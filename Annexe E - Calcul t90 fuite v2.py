@@ -86,9 +86,9 @@ for Q in range (10, 50, 1): #débit en microL/min
         
     # Deuxième régime 
     
-    Fa1 = lambda t, H: Q/A-Pmax/(R*A)-2*ro*g/(R*A)*(H-hoa)+Patm/(R*A)*(Hp-hoa)/(Hp+H-2*hoa)
-    Fb1 = lambda t, H: Q/A-Pmax/(R*A)-2*ro*g/(R*A)*(H-hob)+Patm/(R*A)*(Hp-hob)/(Hp+H-2*hob)
-    Fc1 = lambda t, H: Q/A-Pmax/(R*A)-2*ro*g/(R*A)*(H-hoc)+Patm/(R*A)*(Hp-hoc)/(Hp+H-2*hoc)
+    Fa1 = lambda t, H: Q*(10**-9)/60/A-Pmax/(R*A)-2*ro*g/(R*A)*(H-hoa)+Patm/(R*A)*(Hp-hoa)/(Hp+H-2*hoa)
+    Fb1 = lambda t, H: Q*(10**-9)/60/A-Pmax/(R*A)-2*ro*g/(R*A)*(H-hob)+Patm/(R*A)*(Hp-hob)/(Hp+H-2*hob)
+    Fc1 = lambda t, H: Q*(10**-9)/60/A-Pmax/(R*A)-2*ro*g/(R*A)*(H-hoc)+Patm/(R*A)*(Hp-hoc)/(Hp+H-2*hoc)
     
     t_evala1 = np.arange(j*pas, temps, pas)
     t_evalb1 = np.arange(k*pas, temps, pas)
@@ -108,9 +108,9 @@ for Q in range (10, 50, 1): #débit en microL/min
         return (Pmax-Patm*(Hp-hoc)/(Hp+H1[0]-2*hoc)+2*ro*g*(H1[0]-hoc))/R-0.90*Q*(10**-9)/60
     
 
-    solsa1 = solve_ivp(Fa1, [j*pas, temps+1], [hoa], method='Radau', t_eval=t_evala1, events=eqa)
-    solsb1 = solve_ivp(Fb1, [k*pas, temps+1], [hob], method='Radau', t_eval=t_evalb1, events=eqb)
-    solsc1 = solve_ivp(Fc1, [l*pas, temps+1], [hoc], method='Radau', t_eval=t_evalc1, events=eqc)
+    solsa1 = solve_ivp(Fa1, [j*pas, temps+1], [solsa.y[0,j]], method='Radau', t_eval=t_evala1, events=eqa)
+    solsb1 = solve_ivp(Fb1, [k*pas, temps+1], [solsb.y[0,k]], method='Radau', t_eval=t_evalb1, events=eqb)
+    solsc1 = solve_ivp(Fc1, [l*pas, temps+1], [solsc.y[0,l]], method='Radau', t_eval=t_evalc1, events=eqc)
     
     t90a.append(j*pas/60+solsa1.t_events[0]/60)
         
@@ -119,7 +119,7 @@ for Q in range (10, 50, 1): #débit en microL/min
     t90c.append(l*pas/60+solsc1.t_events[0]/60)
         
 
-# Courbes de t99 selon Q pour les trois valeurs de ho
+# Courbes de t90 selon Q pour les trois valeurs de ho
 
 
 plt.figure(figsize = (10,6))
@@ -131,5 +131,5 @@ plt.plot(Debit, t90b, 'o', color='0.3', label='1,5 mL')
 plt.plot(Debit, t90c, 'd', color='0.3', label='2,0 mL')
 plt.xlabel('Q (microL/min)')
 plt.ylabel('t90 (min)')
-plt.legend(loc = 7, title='Volume initial')
+plt.legend(loc = 2, title='Volume initial')
 plt.show()
