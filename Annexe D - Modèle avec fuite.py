@@ -17,11 +17,11 @@ Q2=25*(10**-9)/60 # m^3/s     Débit 2
 ro=1000 # kg/m^3              Masse volumique du fluide
 g=9.8 # m/s^2                 Accélération de la pesanteur
 Patm=101325 # Pa              Pression atmosphérique
-Pmax=50*100+Patm # Pa         Pression maximale dans le puits d'entrée
+Pmax=150*100+Patm # Pa        Pression maximale dans le puits d'entrée
 
 # Pour les intégrations
 
-temps=40000 #s                Intervalle de temps évalué
+temps=20000 #s                Intervalle de temps évalué
 pas = 1 #s                    Pas
 n=int(temps/pas) #            Nombre d'instants considérés
 n1=int(n-1) #                 n-1
@@ -121,14 +121,15 @@ plt.show()
 #________________________________________________________________________________________
 # Calcul de Heq en faisant dH/dt=0
 
-vPmax=[]
+vPmax1=[]
+vPmax2=[]
 vHeq1=[]
 vHeq2=[]
 
 R1=5*10**12 # Pa*s/m^3
 R2=1*10**14 # Pa*s/m^3
 
-for Pmax1 in np.arange (0, 90, 2) :
+for Pmax1 in np.arange (0, 150, 2) :
    
     a1=(Pmax1*100+Patm-Q2*R1)/(2*ro*g)+Hp-3*ho
     b1=((Q2*R1-(Pmax1*100+Patm))/(2*ro*g)+ho)*(2*ho-Hp)+Patm/(2*ro*g)*(ho-Hp)
@@ -142,16 +143,41 @@ for Pmax1 in np.arange (0, 90, 2) :
     Heq1 = fsolve(f1, Hp)
     Heq2 = fsolve(f2, Hp)
     
-    vPmax.append(Pmax1)
-    vHeq1.append(Heq1*10**3)
-    vHeq2.append(Heq2*10**3)
+    c1=2*ro*g
+    d1=-R1*Q2-6*ro*g*ho
+    e1=2*R1*Q2*ho-2*Patm*(Hp-ho)-2*ro*g*((Hp**2)-2*ho*Hp-2*(ho**2))
+    f1=R1*Q2*Hp*(Hp-2*ho)+2*Patm*ho*(Hp-ho)-2*ro*g*Hp*ho*(2*ho-Hp)
+    
+    c2=2*ro*g
+    d2=-R2*Q2-6*ro*g*ho
+    e2=2*R2*Q2*ho-2*Patm*(Hp-ho)-2*ro*g*((Hp**2)-2*ho*Hp-2*(ho**2))
+    f2=R2*Q2*Hp*(Hp-2*ho)+2*Patm*ho*(Hp-ho)-2*ro*g*Hp*ho*(2*ho-Hp)
+
+
+    fa = lambda Hi: c1*Hi**3 + d1*Hi**2 + e1*Hi + f1
+    fb = lambda Hi: c2*Hi**3 + d2*Hi**2 + e2*Hi + f2
+
+    He1 = fsolve(fa, Hp)
+    He2 = fsolve(fb, Hp)
+    
+    Pe1=(Patm*(Hp-ho)/(Hp-He1)-Patm)*10**-2
+    Pe2=(Patm*(Hp-ho)/(Hp-He2)-Patm)*10**-2
+    
+    
+    if Pe1 >= Pmax1 :
+        vPmax1.append(Pmax1)
+        vHeq1.append(Heq1*10**3)
+    
+    if Pe2 >= Pmax1 :
+        vPmax2.append(Pmax1)
+        vHeq2.append(Heq2*10**3)
     
 plt.figure(figsize = (10,6))
 plt.grid()
 plt.xlim(0,Pmax1)
 #plt.ylim(0,15)
-plt.plot(vPmax, vHeq1, 'o', fillstyle='none', linewidth=1.5, label='R=5·10^12 kg·m^-4/s')
-plt.plot(vPmax, vHeq2, 'o', linewidth=1.5, label='R=1·10^14 kg·m^-4/s')
+plt.plot(vPmax1, vHeq1, 'o', fillstyle='none', linewidth=1.5, label='R=5·10^12 kg·m^-4/s')
+plt.plot(vPmax2, vHeq2, 'o', linewidth=1.5, label='R=1·10^14 kg·m^-4/s')
 plt.xlabel('Pmax rel (mbar)')
 plt.ylabel('Heq (mm)')
 plt.legend(loc = 1)
