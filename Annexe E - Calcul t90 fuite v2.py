@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.optimize import fsolve
 
 # Pour les intégrations
 
@@ -18,7 +19,7 @@ R=10*10**13 # Pa*s/m^3         Résistance hydraulique (considérée constante)
 ro=1000 # kg/m^3              Masse volumique du fluide
 g=9.8 # m/s^2                 Accélération de la pesanteur
 Patm=101325 # Pa              Pression atmosphérique
-Pmax=50*100+Patm # Pa         Pression maximale dans le puits d'entrée
+Pmax=80*100+Patm # Pa         Pression maximale dans le puits d'entrée
 
 # Les valeurs de ho
     
@@ -34,6 +35,9 @@ Debit=[]
 t90a=[]
 t90b=[]
 t90c=[]
+Heqa=[]
+Heqb=[]
+Heqc=[]
 Pe=[]
 
 # Boucle pour calculer les temps t90 en faisant varier le débit
@@ -117,7 +121,12 @@ for Q in range (10, 50, 1): #débit en microL/min
     t90b.append(k*pas/60+solsb1.t_events[0]/60)
     
     t90c.append(l*pas/60+solsc1.t_events[0]/60)
-        
+    
+    Heqa.append(solsa1.y[0, int(temps/pas-j)-1]*1000)
+    Heqb.append(solsb1.y[0, int(temps/pas-k)-1]*1000)
+    Heqc.append(solsc1.y[0, int(temps/pas-l)-1]*1000)
+    
+       
 
 # Courbes de t90 selon Q pour les trois valeurs de ho
 
@@ -131,5 +140,17 @@ plt.plot(Debit, t90b, 'o', color='0.3', label='1,5 mL')
 plt.plot(Debit, t90c, 'd', color='0.3', label='2,0 mL')
 plt.xlabel('Q (microL/min)')
 plt.ylabel('t90 (min)')
+plt.legend(loc = 2, title='Volume initial')
+plt.show()
+
+plt.figure(figsize = (10,6))
+plt.grid()
+plt.xlim(9, 50)
+#plt.ylim(0,)
+plt.plot(Debit, Heqa, 's', color='0.3', label='1,0 mL')
+plt.plot(Debit, Heqb, 'o', color='0.3', label='1,5 mL')
+plt.plot(Debit, Heqc, 'd', color='0.3', label='2,0 mL')
+plt.xlabel('Q (microL/min)')
+plt.ylabel('Heq (mm)')
 plt.legend(loc = 2, title='Volume initial')
 plt.show()
